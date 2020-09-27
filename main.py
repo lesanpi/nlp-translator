@@ -175,7 +175,7 @@ def fitATTN(encoder, decoder, dataloader, epochs=10):
 
 print("Muestra")
 print(dataset['train'][129])
-#fit(encoder, decoder, dataloader, epochs=30)
+fit(encoder, decoder, dataloader, epochs=1)
 
 MAX_LENGTH = 10
 

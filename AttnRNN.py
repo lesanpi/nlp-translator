@@ -15,6 +15,9 @@ class AttnEncoder(torch.nn.Module):
         return outputs, hidden
 
 
+MAX_LENGTH = 10
+
+
 class AttnDecoder(torch.nn.Module):
     def __init__(self, input_size, embedding_size=100, hidden_size=100, n_layers=2, max_length=MAX_LENGTH):
         super().__init__()
