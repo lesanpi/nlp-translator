@@ -1,27 +1,33 @@
+import numpy as np
+from tqdm import tqdm
+from rnn.AttnRNN import AttnDecoder, AttnEncoder
+from rnn.RNN import Encoder, Decoder
 import torch
 import torchtext
 import random
+import sys
+sys.path.append("./utils")
 from utils import *
 from dataset import Dataset
-from RNN import Encoder, Decoder
-from AttnRNN import AttnDecoder, AttnEncoder
-from tqdm import tqdm
-import numpy as np
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-input_lang, output_lang, pairs = prepareData('spa.txt')
-print("Random")
-print(random.choice(pairs))
+input_lang, output_lang, pairs = prepareData('data/spa.txt')
+# print("Random")
+# print(random.choice(pairs))
 
-print("")
-print(output_lang.indexesFromSentence('tengo mucha sed .'))
-print(output_lang.sentenceFromIndex([68, 5028, 135, 4]))
+# print("")
+#print(output_lang.indexesFromSentence('tengo mucha sed .'))
+#print(output_lang.sentenceFromIndex([68, 5028, 135, 4]))
 
 # separamos datos en train-test
 train_size = len(pairs) * 80 // 100
 train = pairs[:train_size]
 test = pairs[train_size:]
+
+subs_size = len(pairs) * 10 // 100
+#train = pairs[:subs_size]
+
 
 # Datasets
 dataset = {
@@ -38,9 +44,9 @@ dataloader = {
 }
 
 inputs, outputs = next(iter(dataloader['train']))
-print(inputs.shape, outputs.shape)
-print(input_lang.sentenceFromIndex(input_sentence.tolist()),
-      output_lang.sentenceFromIndex(output_sentence.tolist()))
+#print(inputs.shape, outputs.shape)
+# print(input_lang.sentenceFromIndex(input_sentence.tolist()),
+#      output_lang.sentenceFromIndex(output_sentence.tolist()))
 
 encoder = Encoder(input_size=input_lang.n_words)
 hidden = encoder(torch.randint(0, input_lang.n_words, (64, 10)))
@@ -173,9 +179,12 @@ def fitATTN(encoder, decoder, dataloader, epochs=10):
                     f"Epoch {epoch}/{epochs} val_loss {np.mean(val_loss):.5f}")
 
 
-print("Muestra")
-print(dataset['train'][129])
-fit(encoder, decoder, dataloader, epochs=1)
+# print("Muestra")
+# print(dataset['train'][129])
+
+fit(encoder, decoder, dataloader, epochs=5)
+torch.save(encoder.state_dict(), "./models/encoder_state_dict.pt")
+torch.save(decoder.state_dict(), "./models/decoder_state_dict.pt")
 
 MAX_LENGTH = 10
 
@@ -201,8 +210,10 @@ def translate(sentence):
     sn = input_lang.indexesFromSentence(sentence)
     sn = torch.Tensor(sn)
     sn = sn.type(torch.long)
-    print(sn)
-    return predict(sn)
+    predicted = predict(sn)
+    return predicted
 
 
-translate("my name is luis")
+#translate("my name is luis")
+print("my name is luis")
+print(translate("my name is luis"))
